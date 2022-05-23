@@ -24,8 +24,32 @@ class kochanek_bartels_surface():
         self.SU = []
         self.DV = []
         self.SV = []
+        self.T = []
+
+    def get_value(self, u, v, world_pos):
+        # TODO: indetify (i, j) with binary search
+
+        return
+
+    def calc_T(self, world_pos):
+        #
+        self.T = []
+        #
+        for j in range(self.gridsize_j):
+            for i in range(self.gridsize_i):
+                if self.grid_flag[self.get_index(i, j)]:
+                    self.T.append(self.getT(i, j, world_pos))
+                else:
+                    # TODO: null
+                    self.T.append(np.zeros((3)))
 
     def calc_UV(self, world_pos, tU, cU, bU, tV, cV, bV):
+        #
+        self.DU = []
+        self.SU = []
+        self.DV = []
+        self.SV = []
+        #
         for j in range(self.gridsize_j):
             for i in range(self.gridsize_i):
                 if self.grid_flag[self.get_index(i, j)]:
@@ -41,13 +65,13 @@ class kochanek_bartels_surface():
                     self.SV.append(np.zeros((3)))
 
     def getDU(self, i, j, world_pos, tU, cU, bU):
-        h = 0.0
-        if i - 1 < 0:
-            h = self.grid_i[i + 1] - self.grid_i[i]
-        elif i + 1 >= self.gridsize_i:
-            h = self.grid_i[i] - self.grid_i[i - 1]
-        else:
-            h = self.grid_i[i + 1] - self.grid_i[i - 1]
+        h = 2.0
+        # if i - 1 < 0:
+        #     h = self.grid_i[i + 1] - self.grid_i[i]
+        # elif i + 1 >= self.gridsize_i:
+        #     h = self.grid_i[i] - self.grid_i[i - 1]
+        # else:
+        #     h = self.grid_i[i + 1] - self.grid_i[i - 1]
 
         result = (1 - tU[self.get_index(i, j)]) * (1 + cU[self.get_index(i, j)]) * (1 + bU[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i - 1, j)]) + \
             (1 - tU[self.get_index(i, j)]) * (1 - cU[self.get_index(i, j)]) * \
@@ -57,13 +81,13 @@ class kochanek_bartels_surface():
         return result
 
     def getSU(self, i, j, world_pos, tU, cU, bU):
-        h = 0.0
-        if i - 1 < 0:
-            h = self.grid_i[i + 1] - self.grid_i[i]
-        elif i + 1 >= self.gridsize_i:
-            h = self.grid_i[i] - self.grid_i[i - 1]
-        else:
-            h = self.grid_i[i + 1] - self.grid_i[i - 1]
+        h = 2.0
+        # if i - 1 < 0:
+        #     h = self.grid_i[i + 1] - self.grid_i[i]
+        # elif i + 1 >= self.gridsize_i:
+        #     h = self.grid_i[i] - self.grid_i[i - 1]
+        # else:
+        #     h = self.grid_i[i + 1] - self.grid_i[i - 1]
 
         result = (1 - tU[self.get_index(i, j)]) * (1 - cU[self.get_index(i, j)]) * (1 + bU[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i - 1, j)]) + \
             (1 - tU[self.get_index(i, j)]) * (1 + cU[self.get_index(i, j)]) * \
@@ -73,13 +97,13 @@ class kochanek_bartels_surface():
         return result
 
     def getDV(self, i, j, world_pos, tV, cV, bV):
-        h = 0.0
-        if j - 1 < 0:
-            h = self.grid_j[j + 1] - self.grid_j[j]
-        elif j + 1 >= self.gridsize_j:
-            h = self.grid_j[j] - self.grid_j[j - 1]
-        else:
-            h = self.grid_j[j + 1] - self.grid_j[j - 1]
+        h = 2.0
+        # if j - 1 < 0:
+        #     h = self.grid_j[j + 1] - self.grid_j[j]
+        # elif j + 1 >= self.gridsize_j:
+        #     h = self.grid_j[j] - self.grid_j[j - 1]
+        # else:
+        #     h = self.grid_j[j + 1] - self.grid_j[j - 1]
 
         result = (1 - tV[self.get_index(i, j)]) * (1 + cV[self.get_index(i, j)]) * (1 + bV[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i, j - 1)]) + \
             (1 - tV[self.get_index(i, j)]) * (1 - cV[self.get_index(i, j)]) * \
@@ -89,13 +113,13 @@ class kochanek_bartels_surface():
         return result
 
     def getSV(self, i, j, world_pos, tV, cV, bV):
-        h = 0.0
-        if j - 1 < 0:
-            h = self.grid_j[j + 1] - self.grid_j[j]
-        elif j + 1 >= self.gridsize_j:
-            h = self.grid_j[j] - self.grid_j[j - 1]
-        else:
-            h = self.grid_j[j + 1] - self.grid_j[j - 1]
+        h = 2.0
+        # if j - 1 < 0:
+        #     h = self.grid_j[j + 1] - self.grid_j[j]
+        # elif j + 1 >= self.gridsize_j:
+        #     h = self.grid_j[j] - self.grid_j[j - 1]
+        # else:
+        #     h = self.grid_j[j + 1] - self.grid_j[j - 1]
 
         result = (1 - tV[self.get_index(i, j)]) * (1 - cV[self.get_index(i, j)]) * (1 + bV[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i, j - 1)]) + \
             (1 - tV[self.get_index(i, j)]) * (1 + cV[self.get_index(i, j)]) * \
@@ -103,6 +127,56 @@ class kochanek_bartels_surface():
             (world_pos[self.get_index(i, j + 1)] -
              world_pos[self.get_index(i, j)])
         return result
+
+    def getT(self, i, j, world_pos):
+        # TODO: hU
+        hU = 0.0
+        if i - 1 < 0:
+            hU = 2.0 * (self.grid_i[i + 1] - self.grid_i[i])
+        elif i + 1 >= self.gridsize_i:
+            hU = 2.0 * (self.grid_i[i] - self.grid_i[i - 1])
+        else:
+            hU = self.grid_i[i + 1] - self.grid_i[i - 1]
+        # TODO: hV
+        hV = 0.0
+        if j - 1 < 0:
+            hV = 2.0 * (self.grid_j[j + 1] - self.grid_j[j])
+        elif j + 1 >= self.gridsize_j:
+            hV = 2.0 * (self.grid_j[j] - self.grid_j[j - 1])
+        else:
+            hV = self.grid_j[j + 1] - self.grid_j[j - 1]
+
+        #
+        # Peter Comninos, "An interpolatingpiecewise bicubic surface with shapeparameters", 2001 -> eq(26) contains misprint
+        first = (self.SV[self.get_index(i + 1, j)] -
+                 self.DV[self.get_index(i - 1, j)]) / hU
+        second = (self.SU[self.get_index(i, j + 1)] -
+                  self.DU[self.get_index(i, j - 1)]) / hV
+        third = None
+        # TODO: boundary check and interpolation
+        if j - 1 < 0:
+            third = 2.0 * (world_pos[self.get_index(i - 1, 1)] -
+                           world_pos[self.get_index(i - 1, 0)]) / hU * hV
+        elif j + 1 >= self.gridsize_j:
+            third = 2.0 * (world_pos[self.get_index(i - 1, self.gridsize_j-1)] -
+                           world_pos[self.get_index(i - 1, self.gridsize_j-1 - 1)]) / hU * hV
+        else:
+            third = (world_pos[self.get_index(i - 1, j + 1)] -
+                     world_pos[self.get_index(i - 1, j - 1)]) / hU * hV
+
+        fourth = None
+        # TODO: boundary check and interpolation
+        if j - 1 < 0:
+            fourth = -2.0 * (world_pos[self.get_index(i + 1, 1)] -
+                             world_pos[self.get_index(i + 1, 0)]) / hU * hV
+        elif j + 1 >= self.gridsize_j:
+            fourth = -2.0 * (world_pos[self.get_index(i + 1, self.gridsize_j-1)] -
+                             world_pos[self.get_index(i + 1, self.gridsize_j-1 - 1)]) / hU * hV
+        else:
+            fourth = -(world_pos[self.get_index(i + 1, j + 1)] -
+                       world_pos[self.get_index(i + 1, j - 1)]) / hU * hV
+
+        return first + second + third + fourth
 
     def get_index(self, i, j):
         # boundary check
