@@ -1,6 +1,8 @@
 import os
 from unittest import result
 
+import bisect
+
 from matplotlib import animation
 import matplotlib.pyplot as plt
 
@@ -26,10 +28,34 @@ class kochanek_bartels_surface():
         self.SV = []
         self.T = []
 
-    def get_value(self, u, v, world_pos):
-        # TODO: indetify (i, j) with binary search
+    def update_geometry(self, world_pos, tU, cU, bU, tV, cV, bV):
+        self.calc_UV(world_pos, tU, cU, bU, tV, cV, bV)
+        self.calc_T(world_pos)
 
-        return
+    def get_value(self, u, v, world_pos, tU, cU, bU, tV, cV, bV):
+        # TODO: indetify (i, j) with binary search
+        i = bisect.bisect_right(self.grid_i, u) - 1
+        j = bisect.bisect_right(self.grid_j, v) - 1
+
+        if i < 0 or i >= self.gridsize_i or j < 0 or j >= self.gridsize_j:
+            print("(u, v) out of range!!")
+            return None
+
+        G = [[world_pos[self.get_index(i, j)], world_pos[self.get_index(i, j + 1)], self.DV[self.get_index(i, j)], self.SV[self.get_index(i, j + 1)]],
+             [world_pos[self.get_index(i + 1, j)], world_pos[self.get_index(i + 1, j + 1)],
+              self.DV[self.get_index(i + 1, j)], self.SV[self.get_index(i + 1, j + 1)]],
+             [self.DU[self.get_index(i, j)], self.DU[self.get_index(
+                 i, j + 1)], self.T[self.get_index(i, j)], self.T[self.get_index(i, j + 1)]],
+             [self.SU[self.get_index(i + 1, j)], self.SU[self.get_index(i + 1, j + 1)],
+             self.T[self.get_index(i + 1, j)], self.T[self.get_index(i + 1, j + 1)]]
+             ]
+
+        result = 0.0
+        for k in range(3):
+            for l in range(3):
+                result += self.cubic_hermite(k, u) * self.cubic_hermite(l, v) * G[k, l]
+        
+        return result
 
     def calc_T(self, world_pos):
         #
@@ -197,93 +223,15 @@ class kochanek_bartels_surface():
         #
         return j * self.gridsize_i + i
 
-
-# def kochanek_bartels_surface(u, v, inputs, grid):
-#     # TODO: calculate i, j from grid
-#     i = 1
-#     j = 1
-
-#     # get world positions
-#     P = np.zeros((4, 4))
-#     for indexU in range(4):
-#         for indexV in range(4):
-#             P[indexU, indexV] = inputs['world_pos'][point_accessor(
-#                 i + indexU - 1, j + indexV - 1, 10, 10)]
-
-#     # P00 = inputs['world_pos'][point_accessor(i, j, 10, 10)]
-
-#     # TODO: parse t, b, c
-#     tU = np.ones((2, 2))
-#     bU = np.ones((2, 2))
-#     cU = np.ones((2, 2))
-
-#     tV = np.ones((2, 2))
-#     bV = np.ones((2, 2))
-#     cV = np.ones((2, 2))
-
-#     tV_10 = None
-#     bV_10 = None
-#     cV_10 = None
-#     tU0_1 = None
-#     bU0_1 = None
-#     cU0_1 = None
-
-#     U = np.array([u**3, u**2, u, 1])
-#     V = np.array([v**3, v**2, v, 1])
-#     M_H = np.matrix([2, -2, 1, 1], [-3, 3, -2, -1], [0, 0, 1, 0], [1, 0, 0, 0])
-
-#     # U
-#     #
-#     DU00 = (1 - tU[0, 0]) * (1 + cU[0, 0]) * (1 + bU[0, 0]) / h * (P[1, 1] - P[0, 1]) + \
-#         (1 - tU[0, 0]) * (1 - cU[0, 0]) * \
-#         (1 - bU[0, 0]) / h * (P[2, 1] - P[1, 1])
-#     #
-#     SU10 = (1 - tU[1, 0]) * (1 - cU[1, 0]) * (1 + bU[1, 0]) / h * (P[2, 1] - P[1, 1]) + \
-#         (1 - tU[1, 0]) * (1 + cU[1, 0]) * \
-#         (1 - bU[1, 0]) / h * (P[3, 1] - P[2, 1])
-#     #
-#     DU01 = (1 - tU[0, 1]) * (1 + cU[0, 1]) * (1 + bU[0, 1]) / h * (P[1, 2] - P[0, 2]) + \
-#         (1 - tU[0, 1]) * (1 - cU[0, 1]) * \
-#         (1 - bU[0, 1]) / h * (P[2, 2] - P[1, 2])
-#     #
-#     SU11 = (1 - tU[1, 1]) * (1 - cU[1, 1]) * (1 + bU[1, 1]) / h * (P[2, 2] - P[1, 2]) + \
-#         (1 - tU[1, 1]) * (1 + cU[1, 1]) * \
-#         (1 - bU[1, 1]) / h * (P[3, 2] - P[2, 2])
-
-#     # V
-#     #
-#     DV00 = (1 - tV[0, 0]) * (1 + cV[0, 0]) * (1 + bV[0, 0]) / h * (P[1, 1] - P[1, 0]) + \
-#         (1 - tV[0, 0]) * (1 - cV[0, 0]) * \
-#         (1 - bV[0, 0]) / h * (P[1, 2] - P[1, 1])
-#     #
-#     SV01 = (1 - tV[0, 1]) * (1 - cV[0, 1]) * (1 + bV[0, 1]) / h * (P[1, 2] - P[1, 1]) + \
-#         (1 - tV[0, 1]) * (1 + cV[0, 1]) * \
-#         (1 - bV[0, 1]) / h * (P[1, 3] - P[1, 2])
-#     #
-#     DV10 = (1 - tV[1, 0]) * (1 + cV[1, 0]) * (1 + bV[1, 0]) / h * (P[2, 1] - P[2, 0]) + \
-#         (1 - tV[1, 0]) * (1 - cV[1, 0]) * \
-#         (1 - bV[1, 0]) / h * (P[2, 2] - P[2, 1])
-#     #
-#     SV11 = (1 - tV[1, 1]) * (1 - cV[1, 1]) * (1 + bV[1, 1]) / h * (P[2, 2] - P[2, 1]) + \
-#         (1 - tV[1, 1]) * (1 + cV[1, 1]) * \
-#         (1 - bV[1, 1]) / h * (P[2, 3] - P[2, 2])
-
-#     # Twist Vectors
-#     #
-#     SV10 = (1 - tV[1, 0]) * (1 - cV[1, 0]) * (1 + bV[1, 0]) / h * (P[2, 1] - P[2, 0]) + \
-#         (1 - tV[1, 0]) * (1 + cV[1, 0]) * \
-#         (1 - bV[1, 0]) / h * (P[2, 2] - P[2, 1])
-#     # DV(-1, 0)
-#     DV_10 = (1 - tV_10) * (1 + cV_10) * (1 + bV_10) / h * (P[0, 1] - P[0, 0]) + \
-#         (1 - tV[0, 0]) * (1 - cV[0, 0]) * \
-#         (1 - bV[0, 0]) / h * (P[1, 2] - P[1, 1])
-
-#     G = np.matrix([])
-
-
-# def point_accessor(i, j, m, n):
-#     return n * i + j
-
+    def cubic_hermite(self, k, u):
+        if k == 0:
+            return 2 * u**3 - 3 * u**2 + 1
+        elif k == 1:
+            return -2 * u**3 + 3 * u**2
+        elif k == 2:
+            return u**3 - 2 * u**2 + u
+        elif k == 1:
+            return u**3 - u**2
 
 def main(unused_argv):
     print()
