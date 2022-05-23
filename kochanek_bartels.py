@@ -1,3 +1,4 @@
+from cmath import pi
 import os
 from unittest import result
 
@@ -5,6 +6,7 @@ import bisect
 
 from matplotlib import animation
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 from absl import app
 from absl import flags
@@ -53,8 +55,9 @@ class kochanek_bartels_surface():
         result = 0.0
         for k in range(3):
             for l in range(3):
-                result += self.cubic_hermite(k, u - self.grid_i[i]) * self.cubic_hermite(l, v - self.grid_j[j]) * G[k, l]
-        
+                result += self.cubic_hermite(k, u - self.grid_i[i]) * self.cubic_hermite(
+                    l, v - self.grid_j[j]) * G[k, l]
+
         return result
 
     def calc_T(self, world_pos):
@@ -233,11 +236,48 @@ class kochanek_bartels_surface():
         elif k == 1:
             return u**3 - u**2
 
+
 def main(unused_argv):
     gridsize_i = 10
     gridsize_j = 10
     grid_i = np.linspace(0, 9)
     grid_j = np.linspace(0, 9)
+    grid_flag = []
+    for i in range(gridsize_i * gridsize_j):
+        grid_flag.append(True)
+
+    world_pos = []
+    tU, cU, bU, tV, cV, bV = []
+    for j in range(gridsize_j):
+        for i in range(gridsize_i):
+            world_pos.append(np.array(i, j, np.sin(
+                2 * pi * i / gridsize_i) * np.cos(2 * pi * j / gridsize_j)))
+            tU.append(1.0)
+            cU.append(1.0)
+            bU.append(1.0)
+            tV.append(1.0)
+            cV.append(1.0)
+            bV.append(1.0)
+
+    surface_gen = kochanek_bartels_surface(
+        gridsize_i, gridsize_j, grid_i, grid_j, grid_flag)
+
+    pu = np.linspace(0.0, 9.0, 30)
+    pv = np.linspace(0.0, 9.0, 30)
+    pz = np.array()
+    for j in range(len(pv)):
+        for i in range(len(pu)):
+            pz.append(surface_gen.get_value(
+                pu[i], pv[j], world_pos, tU, cU, bU, tV, cV, bV))
+
+    fig = plt.figure("Kochanek_bartels", figsize=(6, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_wireframe(pu, pv, pz)
+    ax.scatter3D(pu, pv, pz)
+    ax.set_xlabel("u")
+    ax.set_ylabel("v")
+    ax.set_zlabel("z")
+    ax.set_title("Kochanek_bartels")
 
 
 if __name__ == '__main__':
