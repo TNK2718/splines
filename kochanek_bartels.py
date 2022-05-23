@@ -56,7 +56,7 @@ class kochanek_bartels_surface():
         for k in range(3):
             for l in range(3):
                 result += self.cubic_hermite(k, u - self.grid_i[i]) * self.cubic_hermite(
-                    l, v - self.grid_j[j]) * G[k, l]
+                    l, v - self.grid_j[j]) * G[k][l]
 
         return result
 
@@ -238,20 +238,20 @@ class kochanek_bartels_surface():
 
 
 def main(unused_argv):
-    gridsize_i = 10
-    gridsize_j = 10
-    grid_i = np.linspace(0, 9)
-    grid_j = np.linspace(0, 9)
+    gridsize_i = 11
+    gridsize_j = 11
+    grid_i = np.linspace(0.0, 10.0)
+    grid_j = np.linspace(0.0, 10.0)
     grid_flag = []
     for i in range(gridsize_i * gridsize_j):
         grid_flag.append(True)
 
     world_pos = []
-    tU, cU, bU, tV, cV, bV = []
+    tU, cU, bU, tV, cV, bV = [], [], [], [], [], []
     for j in range(gridsize_j):
         for i in range(gridsize_i):
-            world_pos.append(np.array(i, j, np.sin(
-                2 * pi * i / gridsize_i) * np.cos(2 * pi * j / gridsize_j)))
+            world_pos.append(np.array(
+                [i, j, np.sin(2 * pi * i / gridsize_i) * np.cos(2 * pi * j / gridsize_j)]))
             tU.append(1.0)
             cU.append(1.0)
             bU.append(1.0)
@@ -261,14 +261,14 @@ def main(unused_argv):
 
     surface_gen = kochanek_bartels_surface(
         gridsize_i, gridsize_j, grid_i, grid_j, grid_flag)
+    surface_gen.update_geometry(world_pos, tU, cU, bU, tV, cV, bV)
 
-    pu = np.linspace(0.0, 9.0, 30)
-    pv = np.linspace(0.0, 9.0, 30)
-    pz = np.array()
+    pu = np.linspace(0.1, 8.9, 30)
+    pv = np.linspace(0.1, 8.9, 30)
+    pz = np.linspace(0.1, 8.9, 30)
     for j in range(len(pv)):
         for i in range(len(pu)):
-            pz.append(surface_gen.get_value(
-                pu[i], pv[j], world_pos, tU, cU, bU, tV, cV, bV))
+            pz[j * len(pu) + i] = surface_gen.get_value(pu[i], pv[j], world_pos, tU, cU, bU, tV, cV, bV)[2]
 
     fig = plt.figure("Kochanek_bartels", figsize=(6, 6))
     ax = fig.add_subplot(111, projection='3d')
