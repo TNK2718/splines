@@ -20,35 +20,86 @@ class kochanek_bartels_surface():
         self.grid_i = grid_i
         self.grid_j = grid_j
         self.grid_flag = grid_flag
+        self.DU = []
+        self.SU = []
+        self.DV = []
+        self.SV = []
 
-    def getDU(self, i, j, world_pos, tU, bU, cU):
-        result = (1 - tU[self.get_index(i, j)]) * (1 + cU[self.get_index(i, j)]) * (1 + bU[self.get_index(i, j)]) / 2.0 * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i - 1, j)]) + \
+    def calc_UV(self, world_pos, tU, cU, bU, tV, cV, bV):
+        for j in range(self.gridsize_j):
+            for i in range(self.gridsize_i):
+                if self.grid_flag[self.get_index(i, j)]:
+                    self.DU.append(self.getDU(i, j, world_pos, tU, cU, bU))
+                    self.SU.append(self.getSU(i, j, world_pos, tU, cU, bU))
+                    self.DV.append(self.getDV(i, j, world_pos, tV, cV, bV))
+                    self.SV.append(self.getSV(i, j, world_pos, tV, cV, bV))
+                else:
+                    # TODO: null
+                    self.DU.append(np.zeros((3)))
+                    self.SU.append(np.zeros((3)))
+                    self.DV.append(np.zeros((3)))
+                    self.SV.append(np.zeros((3)))
+
+    def getDU(self, i, j, world_pos, tU, cU, bU):
+        h = 0.0
+        if i - 1 < 0:
+            h = self.grid_i[i + 1] - self.grid_i[i]
+        elif i + 1 >= self.gridsize_i:
+            h = self.grid_i[i] - self.grid_i[i - 1]
+        else:
+            h = self.grid_i[i + 1] - self.grid_i[i - 1]
+
+        result = (1 - tU[self.get_index(i, j)]) * (1 + cU[self.get_index(i, j)]) * (1 + bU[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i - 1, j)]) + \
             (1 - tU[self.get_index(i, j)]) * (1 - cU[self.get_index(i, j)]) * \
-            (1 - bU[self.get_index(i, j)]) / 2.0 * \
+            (1 - bU[self.get_index(i, j)]) / h * \
             (world_pos[self.get_index(i + 1, j)] -
              world_pos[self.get_index(i, j)])
         return result
 
-    def getSU(self, i, j, world_pos, tU, bU, cU):
-        result = (1 - tU[self.get_index(i, j)]) * (1 - cU[self.get_index(i, j)]) * (1 + bU[self.get_index(i, j)]) / 2.0 * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i - 1, j)]) + \
+    def getSU(self, i, j, world_pos, tU, cU, bU):
+        h = 0.0
+        if i - 1 < 0:
+            h = self.grid_i[i + 1] - self.grid_i[i]
+        elif i + 1 >= self.gridsize_i:
+            h = self.grid_i[i] - self.grid_i[i - 1]
+        else:
+            h = self.grid_i[i + 1] - self.grid_i[i - 1]
+
+        result = (1 - tU[self.get_index(i, j)]) * (1 - cU[self.get_index(i, j)]) * (1 + bU[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i - 1, j)]) + \
             (1 - tU[self.get_index(i, j)]) * (1 + cU[self.get_index(i, j)]) * \
-            (1 - bU[self.get_index(i, j)]) / 2.0 * \
+            (1 - bU[self.get_index(i, j)]) / h * \
             (world_pos[self.get_index(i + 1, j)] -
              world_pos[self.get_index(i, j)])
         return result
 
-    def getDV(self, i, j, world_pos, tV, bV, cV):
-        result = (1 - tV[self.get_index(i, j)]) * (1 + cV[self.get_index(i, j)]) * (1 + bV[self.get_index(i, j)]) / 2.0 * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i, j - 1)]) + \
+    def getDV(self, i, j, world_pos, tV, cV, bV):
+        h = 0.0
+        if j - 1 < 0:
+            h = self.grid_j[j + 1] - self.grid_j[j]
+        elif j + 1 >= self.gridsize_j:
+            h = self.grid_j[j] - self.grid_j[j - 1]
+        else:
+            h = self.grid_j[j + 1] - self.grid_j[j - 1]
+
+        result = (1 - tV[self.get_index(i, j)]) * (1 + cV[self.get_index(i, j)]) * (1 + bV[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i, j - 1)]) + \
             (1 - tV[self.get_index(i, j)]) * (1 - cV[self.get_index(i, j)]) * \
-            (1 - bV[self.get_index(i, j)]) / 2.0 * \
+            (1 - bV[self.get_index(i, j)]) / h * \
             (world_pos[self.get_index(i, j + 1)] -
              world_pos[self.get_index(i, j)])
         return result
 
-    def getSV(self, i, j, world_pos, tV, bV, cV):
-        result = (1 - tV[self.get_index(i, j)]) * (1 - cV[self.get_index(i, j)]) * (1 + bV[self.get_index(i, j)]) / 2.0 * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i, j - 1)]) + \
+    def getSV(self, i, j, world_pos, tV, cV, bV):
+        h = 0.0
+        if j - 1 < 0:
+            h = self.grid_j[j + 1] - self.grid_j[j]
+        elif j + 1 >= self.gridsize_j:
+            h = self.grid_j[j] - self.grid_j[j - 1]
+        else:
+            h = self.grid_j[j + 1] - self.grid_j[j - 1]
+
+        result = (1 - tV[self.get_index(i, j)]) * (1 - cV[self.get_index(i, j)]) * (1 + bV[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i, j - 1)]) + \
             (1 - tV[self.get_index(i, j)]) * (1 + cV[self.get_index(i, j)]) * \
-            (1 - bV[self.get_index(i, j)]) / 2.0 * \
+            (1 - bV[self.get_index(i, j)]) / h * \
             (world_pos[self.get_index(i, j + 1)] -
              world_pos[self.get_index(i, j)])
         return result
@@ -69,7 +120,6 @@ class kochanek_bartels_surface():
                 return j * self.gridsize_i + (self.gridsize_i - 1)
             elif j >= self.gridsize_j:
                 return (self.gridsize_j - 1) * self.gridsize_i + i
-
         #
         return j * self.gridsize_i + i
 
@@ -110,49 +160,49 @@ class kochanek_bartels_surface():
 
 #     # U
 #     #
-#     DU00 = (1 - tU[0, 0]) * (1 + cU[0, 0]) * (1 + bU[0, 0]) / 2.0 * (P[1, 1] - P[0, 1]) + \
+#     DU00 = (1 - tU[0, 0]) * (1 + cU[0, 0]) * (1 + bU[0, 0]) / h * (P[1, 1] - P[0, 1]) + \
 #         (1 - tU[0, 0]) * (1 - cU[0, 0]) * \
-#         (1 - bU[0, 0]) / 2.0 * (P[2, 1] - P[1, 1])
+#         (1 - bU[0, 0]) / h * (P[2, 1] - P[1, 1])
 #     #
-#     SU10 = (1 - tU[1, 0]) * (1 - cU[1, 0]) * (1 + bU[1, 0]) / 2.0 * (P[2, 1] - P[1, 1]) + \
+#     SU10 = (1 - tU[1, 0]) * (1 - cU[1, 0]) * (1 + bU[1, 0]) / h * (P[2, 1] - P[1, 1]) + \
 #         (1 - tU[1, 0]) * (1 + cU[1, 0]) * \
-#         (1 - bU[1, 0]) / 2.0 * (P[3, 1] - P[2, 1])
+#         (1 - bU[1, 0]) / h * (P[3, 1] - P[2, 1])
 #     #
-#     DU01 = (1 - tU[0, 1]) * (1 + cU[0, 1]) * (1 + bU[0, 1]) / 2.0 * (P[1, 2] - P[0, 2]) + \
+#     DU01 = (1 - tU[0, 1]) * (1 + cU[0, 1]) * (1 + bU[0, 1]) / h * (P[1, 2] - P[0, 2]) + \
 #         (1 - tU[0, 1]) * (1 - cU[0, 1]) * \
-#         (1 - bU[0, 1]) / 2.0 * (P[2, 2] - P[1, 2])
+#         (1 - bU[0, 1]) / h * (P[2, 2] - P[1, 2])
 #     #
-#     SU11 = (1 - tU[1, 1]) * (1 - cU[1, 1]) * (1 + bU[1, 1]) / 2.0 * (P[2, 2] - P[1, 2]) + \
+#     SU11 = (1 - tU[1, 1]) * (1 - cU[1, 1]) * (1 + bU[1, 1]) / h * (P[2, 2] - P[1, 2]) + \
 #         (1 - tU[1, 1]) * (1 + cU[1, 1]) * \
-#         (1 - bU[1, 1]) / 2.0 * (P[3, 2] - P[2, 2])
+#         (1 - bU[1, 1]) / h * (P[3, 2] - P[2, 2])
 
 #     # V
 #     #
-#     DV00 = (1 - tV[0, 0]) * (1 + cV[0, 0]) * (1 + bV[0, 0]) / 2.0 * (P[1, 1] - P[1, 0]) + \
+#     DV00 = (1 - tV[0, 0]) * (1 + cV[0, 0]) * (1 + bV[0, 0]) / h * (P[1, 1] - P[1, 0]) + \
 #         (1 - tV[0, 0]) * (1 - cV[0, 0]) * \
-#         (1 - bV[0, 0]) / 2.0 * (P[1, 2] - P[1, 1])
+#         (1 - bV[0, 0]) / h * (P[1, 2] - P[1, 1])
 #     #
-#     SV01 = (1 - tV[0, 1]) * (1 - cV[0, 1]) * (1 + bV[0, 1]) / 2.0 * (P[1, 2] - P[1, 1]) + \
+#     SV01 = (1 - tV[0, 1]) * (1 - cV[0, 1]) * (1 + bV[0, 1]) / h * (P[1, 2] - P[1, 1]) + \
 #         (1 - tV[0, 1]) * (1 + cV[0, 1]) * \
-#         (1 - bV[0, 1]) / 2.0 * (P[1, 3] - P[1, 2])
+#         (1 - bV[0, 1]) / h * (P[1, 3] - P[1, 2])
 #     #
-#     DV10 = (1 - tV[1, 0]) * (1 + cV[1, 0]) * (1 + bV[1, 0]) / 2.0 * (P[2, 1] - P[2, 0]) + \
+#     DV10 = (1 - tV[1, 0]) * (1 + cV[1, 0]) * (1 + bV[1, 0]) / h * (P[2, 1] - P[2, 0]) + \
 #         (1 - tV[1, 0]) * (1 - cV[1, 0]) * \
-#         (1 - bV[1, 0]) / 2.0 * (P[2, 2] - P[2, 1])
+#         (1 - bV[1, 0]) / h * (P[2, 2] - P[2, 1])
 #     #
-#     SV11 = (1 - tV[1, 1]) * (1 - cV[1, 1]) * (1 + bV[1, 1]) / 2.0 * (P[2, 2] - P[2, 1]) + \
+#     SV11 = (1 - tV[1, 1]) * (1 - cV[1, 1]) * (1 + bV[1, 1]) / h * (P[2, 2] - P[2, 1]) + \
 #         (1 - tV[1, 1]) * (1 + cV[1, 1]) * \
-#         (1 - bV[1, 1]) / 2.0 * (P[2, 3] - P[2, 2])
+#         (1 - bV[1, 1]) / h * (P[2, 3] - P[2, 2])
 
 #     # Twist Vectors
 #     #
-#     SV10 = (1 - tV[1, 0]) * (1 - cV[1, 0]) * (1 + bV[1, 0]) / 2.0 * (P[2, 1] - P[2, 0]) + \
+#     SV10 = (1 - tV[1, 0]) * (1 - cV[1, 0]) * (1 + bV[1, 0]) / h * (P[2, 1] - P[2, 0]) + \
 #         (1 - tV[1, 0]) * (1 + cV[1, 0]) * \
-#         (1 - bV[1, 0]) / 2.0 * (P[2, 2] - P[2, 1])
+#         (1 - bV[1, 0]) / h * (P[2, 2] - P[2, 1])
 #     # DV(-1, 0)
-#     DV_10 = (1 - tV_10) * (1 + cV_10) * (1 + bV_10) / 2.0 * (P[0, 1] - P[0, 0]) + \
+#     DV_10 = (1 - tV_10) * (1 + cV_10) * (1 + bV_10) / h * (P[0, 1] - P[0, 0]) + \
 #         (1 - tV[0, 0]) * (1 - cV[0, 0]) * \
-#         (1 - bV[0, 0]) / 2.0 * (P[1, 2] - P[1, 1])
+#         (1 - bV[0, 0]) / h * (P[1, 2] - P[1, 1])
 
 #     G = np.matrix([])
 
