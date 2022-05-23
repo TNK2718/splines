@@ -53,7 +53,7 @@ class kochanek_bartels_surface():
         result = 0.0
         for k in range(3):
             for l in range(3):
-                result += self.cubic_hermite(k, u) * self.cubic_hermite(l, v) * G[k, l]
+                result += self.cubic_hermite(k, u - self.grid_i[i]) * self.cubic_hermite(l, v - self.grid_j[j]) * G[k, l]
         
         return result
 
@@ -234,7 +234,10 @@ class kochanek_bartels_surface():
             return u**3 - u**2
 
 def main(unused_argv):
-    print()
+    gridsize_i = 10
+    gridsize_j = 10
+    grid_i = np.linspace(0, 9)
+    grid_j = np.linspace(0, 9)
 
 
 if __name__ == '__main__':
