@@ -16,7 +16,7 @@ import math
 import numpy as np
 import mpl_toolkits.mplot3d as p3d
 
-
+# Implementation of Peter Comninos, "An interpolatingpiecewise bicubic surface with shapeparameters", 2001
 class kochanek_bartels_surface():
     def __init__(self, grid_size_i, grid_size_j, grid_i, grid_j, grid_flag):
         self.gridsize_i = grid_size_i
@@ -30,18 +30,19 @@ class kochanek_bartels_surface():
         self.SV = []
         self.T = []
 
+    # Compute and store vectors(U, V, T) for computing
     def update_geometry(self, world_pos, tU, cU, bU, tV, cV, bV):
         self.calc_UV(world_pos, tU, cU, bU, tV, cV, bV)
         self.calc_T(world_pos)
 
+    # Compute position at (u, v) of the surface 
     def get_value(self, u, v, world_pos):
         # TODO: indetify (i, j) with binary search
         i = bisect.bisect_right(self.grid_i, u) - 1
         j = bisect.bisect_right(self.grid_j, v) - 1
         # print((i, j))
 
-        #
-        # normalize
+        # For normalize
         hU = self.grid_i[i + 1] - self.grid_i[i]
         hV = self.grid_j[j + 1] - self.grid_j[j]
 
@@ -50,6 +51,7 @@ class kochanek_bartels_surface():
             print("(u, v) out of range!!")
             return None
 
+        #
         G = [[world_pos[self.get_index(i, j)], world_pos[self.get_index(i, j + 1)], self.DV[self.get_index(i, j)], self.SV[self.get_index(i, j + 1)]],
              [world_pos[self.get_index(i + 1, j)], world_pos[self.get_index(i + 1, j + 1)],
               self.DV[self.get_index(i + 1, j)], self.SV[self.get_index(i + 1, j + 1)]],
@@ -104,12 +106,12 @@ class kochanek_bartels_surface():
 
     def getDU(self, i, j, world_pos, tU, cU, bU):
         h = 2.0
-        if i - 1 < 0:
-            h = self.grid_i[i + 1] - self.grid_i[i]
-        elif i + 1 >= self.gridsize_i:
-            h = self.grid_i[i] - self.grid_i[i - 1]
-        else:
-            h = self.grid_i[i + 1] - self.grid_i[i - 1]
+        # if i - 1 < 0:
+        #     h = self.grid_i[i + 1] - self.grid_i[i]
+        # elif i + 1 >= self.gridsize_i:
+        #     h = self.grid_i[i] - self.grid_i[i - 1]
+        # else:
+        #     h = self.grid_i[i + 1] - self.grid_i[i - 1]
 
         result = (1 - tU[self.get_index(i, j)]) * (1 + cU[self.get_index(i, j)]) * (1 + bU[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i - 1, j)]) + \
             (1 - tU[self.get_index(i, j)]) * (1 - cU[self.get_index(i, j)]) * \
@@ -120,12 +122,12 @@ class kochanek_bartels_surface():
 
     def getSU(self, i, j, world_pos, tU, cU, bU):
         h = 2.0
-        if i - 1 < 0:
-            h = self.grid_i[i + 1] - self.grid_i[i]
-        elif i + 1 >= self.gridsize_i:
-            h = self.grid_i[i] - self.grid_i[i - 1]
-        else:
-            h = self.grid_i[i + 1] - self.grid_i[i - 1]
+        # if i - 1 < 0:
+        #     h = self.grid_i[i + 1] - self.grid_i[i]
+        # elif i + 1 >= self.gridsize_i:
+        #     h = self.grid_i[i] - self.grid_i[i - 1]
+        # else:
+        #     h = self.grid_i[i + 1] - self.grid_i[i - 1]
 
         result = (1 - tU[self.get_index(i, j)]) * (1 - cU[self.get_index(i, j)]) * (1 + bU[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i - 1, j)]) + \
             (1 - tU[self.get_index(i, j)]) * (1 + cU[self.get_index(i, j)]) * \
@@ -136,12 +138,12 @@ class kochanek_bartels_surface():
 
     def getDV(self, i, j, world_pos, tV, cV, bV):
         h = 2.0
-        if j - 1 < 0:
-            h = self.grid_j[j + 1] - self.grid_j[j]
-        elif j + 1 >= self.gridsize_j:
-            h = self.grid_j[j] - self.grid_j[j - 1]
-        else:
-            h = self.grid_j[j + 1] - self.grid_j[j - 1]
+        # if j - 1 < 0:
+        #     h = self.grid_j[j + 1] - self.grid_j[j]
+        # elif j + 1 >= self.gridsize_j:
+        #     h = self.grid_j[j] - self.grid_j[j - 1]
+        # else:
+        #     h = self.grid_j[j + 1] - self.grid_j[j - 1]
 
         result = (1 - tV[self.get_index(i, j)]) * (1 + cV[self.get_index(i, j)]) * (1 + bV[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i, j - 1)]) + \
             (1 - tV[self.get_index(i, j)]) * (1 - cV[self.get_index(i, j)]) * \
@@ -152,12 +154,12 @@ class kochanek_bartels_surface():
 
     def getSV(self, i, j, world_pos, tV, cV, bV):
         h = 2.0
-        if j - 1 < 0:
-            h = self.grid_j[j + 1] - self.grid_j[j]
-        elif j + 1 >= self.gridsize_j:
-            h = self.grid_j[j] - self.grid_j[j - 1]
-        else:
-            h = self.grid_j[j + 1] - self.grid_j[j - 1]
+        # if j - 1 < 0:
+        #     h = self.grid_j[j + 1] - self.grid_j[j]
+        # elif j + 1 >= self.gridsize_j:
+        #     h = self.grid_j[j] - self.grid_j[j - 1]
+        # else:
+        #     h = self.grid_j[j + 1] - self.grid_j[j - 1]
 
         result = (1 - tV[self.get_index(i, j)]) * (1 - cV[self.get_index(i, j)]) * (1 + bV[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i, j - 1)]) + \
             (1 - tV[self.get_index(i, j)]) * (1 + cV[self.get_index(i, j)]) * \
@@ -185,7 +187,7 @@ class kochanek_bartels_surface():
             hV = self.grid_j[j + 1] - self.grid_j[j - 1]
 
         #
-        # Peter Comninos, "An interpolatingpiecewise bicubic surface with shapeparameters", 2001 -> eq(26) contains misprint
+        # Peter Comninos, "An interpolatingpiecewise bicubic surface with shapeparameters", 2001 -> eq(26) CONTAINS MISPRINT
         first = (self.SV[self.get_index(i + 1, j)] -
                  self.DV[self.get_index(i - 1, j)]) / hU
         second = (self.SU[self.get_index(i, j + 1)] -
@@ -249,9 +251,9 @@ class kochanek_bartels_surface():
 def main(unused_argv):
     gridsize_i = 5
     gridsize_j = 5
-    grid_i = np.linspace(0.0, 10.000001, gridsize_i)
-    grid_j = np.linspace(0.0, 10.000001, gridsize_j)
-    # print(grid_i)
+    # Add epsilon to max value to draw the boundary
+    grid_i = np.linspace(0.0, 10.0 + 0.000001, gridsize_i)
+    grid_j = np.linspace(0.0, 10.0 + 0.000001, gridsize_j)
 
     grid_flag = []
     for i in range(gridsize_i * gridsize_j):
@@ -261,19 +263,19 @@ def main(unused_argv):
     tU, cU, bU, tV, cV, bV = [], [], [], [], [], []
     for j in range(gridsize_j):
         for i in range(gridsize_i):
-            # world_pos.append(np.array(
-            #     [i, j, np.sin(2 * pi * i / gridsize_i) * np.cos(2 * pi * j / gridsize_j)]))
             world_pos.append(np.array(
-                [10.0 * i / (gridsize_i - 1), 10.0 * j / (gridsize_j - 1), np.sin(2 * pi * i / gridsize_i)]))
+                [10.0 * i / (gridsize_i - 1), 10.0 * j / (gridsize_j - 1), np.sin(2 * pi * i / (gridsize_i - 1)) * np.cos(2 * pi * j / (gridsize_j - 1))]))
+            # world_pos.append(np.array(
+            #     [10.0 * i / (gridsize_i - 1), 5.0 * j / (gridsize_j - 1), np.sin(2 * pi * i / gridsize_i)]))
             # world_pos.append(np.array(
             #     [10.0 * i / (gridsize_i - 1), 10.0 * j / (gridsize_j - 1), 1.0 * i**2 / gridsize_i]))
 
             tU.append(0.0)
             cU.append(0.0)
-            bU.append(0.0)
+            bU.append(0.5)
             tV.append(0.0)
             cV.append(0.0)
-            bV.append(0.0)
+            bV.append(-0.5)
     
     surface_gen = kochanek_bartels_surface(
         gridsize_i, gridsize_j, grid_i, grid_j, grid_flag)
