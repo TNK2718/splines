@@ -272,10 +272,10 @@ def main(unused_argv):
 
             tU.append(0.0)
             cU.append(0.0)
-            bU.append(0.5)
+            bU.append(0.0)
             tV.append(0.0)
             cV.append(0.0)
-            bV.append(-0.5)
+            bV.append(0.0)
     
     surface_gen = kochanek_bartels_surface(
         gridsize_i, gridsize_j, grid_i, grid_j, grid_flag)
