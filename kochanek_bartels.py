@@ -34,10 +34,11 @@ class kochanek_bartels_surface():
         self.calc_UV(world_pos, tU, cU, bU, tV, cV, bV)
         self.calc_T(world_pos)
 
-    def get_value(self, u, v, world_pos, tU, cU, bU, tV, cV, bV):
+    def get_value(self, u, v, world_pos):
         # TODO: indetify (i, j) with binary search
         i = bisect.bisect_right(self.grid_i, u) - 1
         j = bisect.bisect_right(self.grid_j, v) - 1
+        # print((i, j))
 
         if i < 0 or i >= self.gridsize_i or j < 0 or j >= self.gridsize_j:
             print("(u, v) out of range!!")
@@ -95,12 +96,12 @@ class kochanek_bartels_surface():
 
     def getDU(self, i, j, world_pos, tU, cU, bU):
         h = 2.0
-        # if i - 1 < 0:
-        #     h = self.grid_i[i + 1] - self.grid_i[i]
-        # elif i + 1 >= self.gridsize_i:
-        #     h = self.grid_i[i] - self.grid_i[i - 1]
-        # else:
-        #     h = self.grid_i[i + 1] - self.grid_i[i - 1]
+        if i - 1 < 0:
+            h = self.grid_i[i + 1] - self.grid_i[i]
+        elif i + 1 >= self.gridsize_i:
+            h = self.grid_i[i] - self.grid_i[i - 1]
+        else:
+            h = self.grid_i[i + 1] - self.grid_i[i - 1]
 
         result = (1 - tU[self.get_index(i, j)]) * (1 + cU[self.get_index(i, j)]) * (1 + bU[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i - 1, j)]) + \
             (1 - tU[self.get_index(i, j)]) * (1 - cU[self.get_index(i, j)]) * \
@@ -111,12 +112,12 @@ class kochanek_bartels_surface():
 
     def getSU(self, i, j, world_pos, tU, cU, bU):
         h = 2.0
-        # if i - 1 < 0:
-        #     h = self.grid_i[i + 1] - self.grid_i[i]
-        # elif i + 1 >= self.gridsize_i:
-        #     h = self.grid_i[i] - self.grid_i[i - 1]
-        # else:
-        #     h = self.grid_i[i + 1] - self.grid_i[i - 1]
+        if i - 1 < 0:
+            h = self.grid_i[i + 1] - self.grid_i[i]
+        elif i + 1 >= self.gridsize_i:
+            h = self.grid_i[i] - self.grid_i[i - 1]
+        else:
+            h = self.grid_i[i + 1] - self.grid_i[i - 1]
 
         result = (1 - tU[self.get_index(i, j)]) * (1 - cU[self.get_index(i, j)]) * (1 + bU[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i - 1, j)]) + \
             (1 - tU[self.get_index(i, j)]) * (1 + cU[self.get_index(i, j)]) * \
@@ -127,12 +128,12 @@ class kochanek_bartels_surface():
 
     def getDV(self, i, j, world_pos, tV, cV, bV):
         h = 2.0
-        # if j - 1 < 0:
-        #     h = self.grid_j[j + 1] - self.grid_j[j]
-        # elif j + 1 >= self.gridsize_j:
-        #     h = self.grid_j[j] - self.grid_j[j - 1]
-        # else:
-        #     h = self.grid_j[j + 1] - self.grid_j[j - 1]
+        if j - 1 < 0:
+            h = self.grid_j[j + 1] - self.grid_j[j]
+        elif j + 1 >= self.gridsize_j:
+            h = self.grid_j[j] - self.grid_j[j - 1]
+        else:
+            h = self.grid_j[j + 1] - self.grid_j[j - 1]
 
         result = (1 - tV[self.get_index(i, j)]) * (1 + cV[self.get_index(i, j)]) * (1 + bV[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i, j - 1)]) + \
             (1 - tV[self.get_index(i, j)]) * (1 - cV[self.get_index(i, j)]) * \
@@ -143,12 +144,12 @@ class kochanek_bartels_surface():
 
     def getSV(self, i, j, world_pos, tV, cV, bV):
         h = 2.0
-        # if j - 1 < 0:
-        #     h = self.grid_j[j + 1] - self.grid_j[j]
-        # elif j + 1 >= self.gridsize_j:
-        #     h = self.grid_j[j] - self.grid_j[j - 1]
-        # else:
-        #     h = self.grid_j[j + 1] - self.grid_j[j - 1]
+        if j - 1 < 0:
+            h = self.grid_j[j + 1] - self.grid_j[j]
+        elif j + 1 >= self.gridsize_j:
+            h = self.grid_j[j] - self.grid_j[j - 1]
+        else:
+            h = self.grid_j[j + 1] - self.grid_j[j - 1]
 
         result = (1 - tV[self.get_index(i, j)]) * (1 - cV[self.get_index(i, j)]) * (1 + bV[self.get_index(i, j)]) / h * (world_pos[self.get_index(i, j)] - world_pos[self.get_index(i, j - 1)]) + \
             (1 - tV[self.get_index(i, j)]) * (1 + cV[self.get_index(i, j)]) * \
@@ -238,10 +239,11 @@ class kochanek_bartels_surface():
 
 
 def main(unused_argv):
-    gridsize_i = 11
-    gridsize_j = 11
-    grid_i = np.linspace(0.0, 10.0)
-    grid_j = np.linspace(0.0, 10.0)
+    gridsize_i = 2
+    gridsize_j = 2
+    grid_i = np.linspace(0.0, 10.0, gridsize_i)
+    grid_j = np.linspace(0.0, 10.0, gridsize_j)
+    print(grid_i)
     grid_flag = []
     for i in range(gridsize_i * gridsize_j):
         grid_flag.append(True)
@@ -250,11 +252,16 @@ def main(unused_argv):
     tU, cU, bU, tV, cV, bV = [], [], [], [], [], []
     for j in range(gridsize_j):
         for i in range(gridsize_i):
+            # world_pos.append(np.array(
+            #     [i, j, np.sin(2 * pi * i / gridsize_i) * np.cos(2 * pi * j / gridsize_j)]))
+            # world_pos.append(np.array(
+            #     [i, j, np.sin(2 * pi * i / gridsize_i)]))
             world_pos.append(np.array(
-                [i, j, np.sin(2 * pi * i / gridsize_i) * np.cos(2 * pi * j / gridsize_j)]))
+                [i / gridsize_i, j / gridsize_j, i**2 / gridsize_i]))
+
             tU.append(1.0)
             cU.append(1.0)
-            bU.append(1.0)
+            bU.append(2.0)
             tV.append(1.0)
             cV.append(1.0)
             bV.append(1.0)
@@ -263,21 +270,22 @@ def main(unused_argv):
         gridsize_i, gridsize_j, grid_i, grid_j, grid_flag)
     surface_gen.update_geometry(world_pos, tU, cU, bU, tV, cV, bV)
 
-    pu = np.linspace(0.1, 8.9, 30)
-    pv = np.linspace(0.1, 8.9, 30)
-    pz = np.linspace(0.1, 8.9, 30)
+    size = 100
+    pu = np.linspace(0.0, 10.0, size)
+    pv = np.linspace(0.0, 10.0, size)
+    x = np.zeros((size * size, 3))
     for j in range(len(pv)):
         for i in range(len(pu)):
-            pz[j * len(pu) + i] = surface_gen.get_value(pu[i], pv[j], world_pos, tU, cU, bU, tV, cV, bV)[2]
+            x[j * len(pu) + i] = surface_gen.get_value(pu[i], pv[j], world_pos)
 
     fig = plt.figure("Kochanek_bartels", figsize=(6, 6))
     ax = fig.add_subplot(111, projection='3d')
-    ax.plot_wireframe(pu, pv, pz)
-    ax.scatter3D(pu, pv, pz)
+    ax.scatter3D(x[:, 0], x[:, 1], x[:, 2])
     ax.set_xlabel("u")
     ax.set_ylabel("v")
     ax.set_zlabel("z")
     ax.set_title("Kochanek_bartels")
+    plt.show()
 
 
 if __name__ == '__main__':
