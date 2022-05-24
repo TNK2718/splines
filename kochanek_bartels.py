@@ -1,4 +1,3 @@
-from cmath import pi
 import os
 from unittest import result
 
@@ -263,9 +262,10 @@ def main(unused_argv):
     tU, cU, bU, tV, cV, bV = [], [], [], [], [], []
     for j in range(gridsize_j):
         for i in range(gridsize_i):
-            world_pos.append(np.array(
-                [10.0 * i / (gridsize_i - 1), 10.0 * j / (gridsize_j - 1), np.sin(2 * pi * i / (gridsize_i - 1)) * np.cos(2 * pi * j / (gridsize_j - 1))]))
             # world_pos.append(np.array(
+            #     [10.0 * i / (gridsize_i - 1), 10.0 * j / (gridsize_j - 1), np.sin(2 * pi * i / (gridsize_i - 1)) * np.cos(2 * pi * j / (gridsize_j - 1))]))
+            world_pos.append(np.array(
+                [10.0 * i / (gridsize_i - 1), 10.0 * j / (gridsize_j - 1), math.sqrt((5.0 * (i / (gridsize_i - 1) - 0.5))**2 + (5.0 * (j / (gridsize_j - 1) - 0.5))**2)]))            # world_pos.append(np.array(
             #     [10.0 * i / (gridsize_i - 1), 5.0 * j / (gridsize_j - 1), np.sin(2 * pi * i / gridsize_i)]))
             # world_pos.append(np.array(
             #     [10.0 * i / (gridsize_i - 1), 10.0 * j / (gridsize_j - 1), 1.0 * i**2 / gridsize_i]))
